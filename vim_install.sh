@@ -41,21 +41,6 @@ else
    echo "Vim already installed" 
 fi
 
-# check if wget is installed
-which wget >/dev/null 
-if [[ $? -ne 0 ]]; then
-    echo "Installing wget"
-    $pkgm install wget -y >/dev/null
-
-    which wget >/dev/null 
-
-    if [[ $? -ne 0 ]]; then
-	echo "Error : wget couldn't get installed"
-	exit 1
-    fi
-else
-   echo "wget already installed" 
-fi
 
 echo "Creating directories"
 mkdir -p /home/$SUDO_USER/.vim/{colors,undo.d}
