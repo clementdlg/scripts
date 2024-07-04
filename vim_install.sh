@@ -21,7 +21,7 @@ if [[ $? -ne 0 ]]; then
 	cmd="dnf install"
 
     elif [[ $distro == 'debian' || $distro == 'ubuntu' ]]; then
-	cmd="apt install"
+	cmd="apt-get install"
 
     elif [[ $distro == 'arch' ]]; then
 	cmd="pacman -Sy"
