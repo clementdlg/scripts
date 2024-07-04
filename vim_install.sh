@@ -18,7 +18,7 @@ if [[ $? -ne 0 ]]; then
     distro=$(cat /etc/os-release | grep '^ID=' | cut -d= -f2)
 
     if [[ $distro == 'fedora' ]]; then
-	cmd="dnf install"
+	cmd="dnf install -y"
 
     elif [[ $distro == 'debian' || $distro == 'ubuntu' ]]; then
 	cmd="apt-get install"
