@@ -47,13 +47,13 @@ if [[ $? -ne 0 ]]; then
 fi
 
 echo "Downloading dotfiles"
-wget -O /home/$SUDO_USER/.vim/vimrc https://raw.githubusercontent.com/0xKrem/dotfiles/master/vimrc_merged >/dev/null
+wget -q -O /home/$SUDO_USER/.vim/vimrc https://raw.githubusercontent.com/0xKrem/dotfiles/master/vimrc_merged 
 if [[ $? -ne 0 ]]; then
     echo "Error : Failed to download vimrc from github"
     exit
 fi
 
-wget -O /home/$SUDO_USER/.vim/colors/tokyonight.vim https://raw.githubusercontent.com/0xKrem/dotfiles/master/vim/colors/tokyonight.vim >/dev/null
+wget -q -O /home/$SUDO_USER/.vim/colors/tokyonight.vim https://raw.githubusercontent.com/0xKrem/dotfiles/master/vim/colors/tokyonight.vim 
 if [[ $? -ne 0 ]]; then
     echo "Warning : Failed to download colorscheme"
 fi
