@@ -10,39 +10,35 @@ if [[ $EUID -ne 0 ]]; then
     exit 1
 fi
 
-
-# get package manager
-distro=$(lsb-release -i | awk '{ print $3 }')
-if [[ $distro == 'Fedora' ]]; then
-    pkgm="dnf"
-    echo "Package Manager is DNF"
-
-elif [[ $distro == 'Debian' || $distro == 'Ubuntu' ]]; then
-    pkgm="apt"
-    echo "Package Manager is APT"
-else
-    echo "Error : Unsupported distribution"
-    exit 1
-fi
-
 # check if vim is installed
 which vim >/dev/null 
 if [[ $? -ne 0 ]]; then
+
     echo "Installing Vim"
-    $pkgm install vim -y >/dev/null
+    distro=$(cat /etc/os-release | grep '^ID=' | cut -d= -f2)
 
-    which vim >/dev/null 
+    if [[ $distro == 'fedora' ]]; then
+	cmd="dnf install"
 
-    if [[ $? -ne 0 ]]; then
-	echo "Error : Vim couldn't get installed"
+    elif [[ $distro == 'debian' || $distro == 'ubuntu' ]]; then
+	cmd="apt install"
+
+    elif [[ $distro == 'arch' ]]; then
+	cmd="pacman -Sy"
+
+    else
+	echo "Error : Unsupported distribution"
 	exit 1
     fi
+
+    $cmd vim >/dev/null
+
 else
-   echo "Vim already installed" 
+    echo "Vim is already installed"
 fi
 
 
-echo "Creating directories"
+echo "Creating vim directory at ~/$SUDO_USER/.vim"
 mkdir -p /home/$SUDO_USER/.vim/{colors,undo.d}
 
 if [[ $? -ne 0 ]]; then
