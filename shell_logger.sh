@@ -16,7 +16,7 @@ function logger() {
     if [[ $? -eq 0 ]]; then
 
 	# retrieve 
-	last_cmd=$(history 1 | sed 's/^\ [0-9]*\ \ //')
+	last_cmd=$(history 1 | sed 's/^\ *[0-9]*\ \ //')
 
 	# write log
 	echo "$(date +%H-%M-%S):$USER:$PWD:$last_cmd" >> $logfile
