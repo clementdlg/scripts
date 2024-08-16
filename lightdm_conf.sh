@@ -3,7 +3,7 @@
 if [[ ! -n "$1" ]]; then
     echo "This script is part of KRem's Auto Bootstrap Script (KRABS)
 
-Its purpose is to configure display manager and sessions
+Its purpose is to configure display manager
 You must run it as root and pass a file path of the background image as an argument
     Accepted extensions are .jpg and .png
     Example : ./script '/path/to/image.png'"
@@ -43,6 +43,12 @@ if ! which lightdm-gtk-greeter ; then
     dnf install lightdm-gtk-greeter -y >/dev/null
 fi
 
+# check if papirus is installed
+if ! rpm -q 'epapirus-icon-theme' ; then
+    echo "Installing  rpm -q 'epapirus-icon-theme' >/dev/null"
+    dnf install lightdm-gtk-greeter -y >/dev/null
+fi
+
 # configure services
 echo "Configuring service and target"
 systemctl enable lightdm.service >/dev/null
@@ -70,4 +76,6 @@ indicators = ~host;~spacer;~clock;~spacer;~layout;~separator;~session;~power" > 
 
 
 # rename override background
-mv /usr/share/backgrounds/xfce/{,_}xfce-shapes.svg
+if [[ -f "/usr/share/backgrounds/xfce/xfce-shapes.svg" ]]; then
+    mv /usr/share/backgrounds/xfce/{,_}xfce-shapes.svg
+fi
