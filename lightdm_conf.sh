@@ -1,3 +1,4 @@
+#!/bin/bash
 
 # help
 if [[ ! -n "$1" ]]; then
@@ -34,12 +35,12 @@ img="$1"
 
 # check lightdm is installed
 if ! which lightdm ; then
-    echo "Installing lightdm..."
+    echo "Installing lightdm"
     dnf install lightdm -y >/dev/null
 fi
 
 if ! which lightdm-gtk-greeter ; then
-    echo "Installing lightdm-gtk-greeter..."
+    echo "Installing lightdm-gtk-greeter"
     dnf install lightdm-gtk-greeter -y >/dev/null
 fi
 
@@ -79,3 +80,5 @@ indicators = ~host;~spacer;~clock;~spacer;~layout;~separator;~session;~power" > 
 if [[ -f "/usr/share/backgrounds/xfce/xfce-shapes.svg" ]]; then
     mv /usr/share/backgrounds/xfce/{,_}xfce-shapes.svg
 fi
+
+echo "Lightdm is successfully configured"

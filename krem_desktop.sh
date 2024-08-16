@@ -17,12 +17,14 @@ fi
 
 $user=$SUDO_USER
 home="/home/$user"
+$PWD=$home
 dnf="/etc/dnf/dnf.conf"
 dotfiles="https://github.com/0xKrem/dotfiles.git"
 dotconf="$home/.config"
 theme_dir="$home/.local/share/themes"
 lockscreen_bg="$dotconf/awesome/theme/lockscreen-bg-fhd.png"
 gtk_theme="https://github.com/daniruiz/skeuos-gtk.git"
+awesome_session="/usr/share/xsessions/awesome.desktop"
 
 # edit dnf config
 if ! grep 'fastestmirror=true' ; then
@@ -44,22 +46,20 @@ if ! grep 'max_parallel_downloads=20' $dnf; then
 fi
 
 # install packets
-./pkg_installer.sh
+./KRABS/modules/pkg_installer.sh
 
 # setup dotfiles
 sudo -u $user mkdir $dotconf
 sudo -u $user git clone $dotfiles $dotconf
 if [[ $? -ne 0 ]]; then
-    echo "Error: Can not clone dotfiles repo"
+    echo "Error: Can not clone $dotfiles"
     exit 1
 fi
 
 # setup lightdm
-./lightdm_conf.sh $lockscreen_bg
+./KRABS/modules/lightdm_conf.sh $lockscreen_bg
 
 # create awesome session
-awesome_session="/usr/share/xsessions/awesome.desktop"
-
 if [[ ! -f $awesome_session ]]; then
     echo "[Desktop Entry]
     Name=awesome
@@ -86,17 +86,20 @@ sudo -u $user mv $theme_dir/skeuos-gtk/themes/Skeuos-Blue-Dark $theme_dir
 rm -fr skeuos-gtk/
 
 # install fonts
-./font_installer.sh
+chmod 744 font_installer.sh
+chown krem:krem font_installer.sh
+sudo -u $user ./$home/KRABS/modules/font_installer.sh
 
+# firewall
+    # syncthing
+firewall-cmd --add-port=22000/udp --permanent
+firewall-cmd --add-port=22000/tcp --permanent
 
 # missing 
+# - better bootstap command using curl
 # - flatpaks
-# - lockscreen background
 # - mozilla user.js
 # - syncthing daemon
-# firewall-cmd --add-port=22000/udp --permanent
-# firewall-cmd --add-port=22000/tcp --permanent
 # flatpak overrides
-# mouting my ssd as home
-#
-#chmod 755 $dotconf/awesome/theme/lockscreen-bg-fhd.png
+# mounting my ssd as home
+# btrfs snapper

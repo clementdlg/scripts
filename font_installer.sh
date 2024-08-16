@@ -1,8 +1,23 @@
-#/bin/bash
-PATH="/usr/local/bin/:/usr/local/sbin/:/usr/bin/:/usr/sbin/"
+#!/bin/bash
 
-echo "This script's purpose is to download and install fonts from a url archive"
-read -p "Enter font archive (zip) download link : " link
+# help
+if [[ ! -n "$1" ]]; then
+    echo "This script's purpose is to download and install fonts from a url archive
+    You must provide a zip archive download link"
+    exit 0
+fi
+
+# arg checking
+if [[ ! -n "$1" ]]; then
+    echo "Error: You must provide a download link"
+    exit 1
+fi
+
+if ! grep  -E '^http[s]?:[\/]{2}.*[.]zip$' <<< $1 ; then
+    echo "Error: You must provide a download link as a zip archive"
+    exit 1
+fi
+link="$1"
 
 # getting the archive name
 arch_name="$(echo $link| sed -E 's/^.*\///')"
@@ -20,18 +35,10 @@ if [[ $type == "zip" ]]; then
     fi
 fi
 
-font_path="/home/$USER/.local/share/fonts/$font_name"
+font_path="$HOME/.local/share/fonts/$font_name"
 if [[ ! -d $font_path ]]; then
     echo "Creating $font_path"
     mkdir -p $font_path
-    if [[ $? -ne 0 ]]; then
-	echo "Failed to create font path"
-	exit 1
-    fi
-else
-    echo "Error : $font_path already exists"
-    echo "$font_name is probably already installed"
-    exit 1
 fi
 
 echo "Downloading font archive to $font_path/$arch_name"

@@ -1,4 +1,3 @@
-# TODO : support mutliple distros (ubuntu / debian, arch, fedora)
 # check privileges
 if [[ $EUID -ne 0 ]]; then
     echo "Error: Run this script with root privileges"
