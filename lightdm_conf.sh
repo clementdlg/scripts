@@ -11,10 +11,11 @@ You must run it as root and pass a file path of the background image as an argum
 fi
 
 # check if running as root
-if [[ $EUID -ne 0 ]]; then
-    echo "Error: Run this script as root"
+if [[ $EUID -ne 0 || ! -n $SUDO_USER ]]; then
+    echo "Error: Run this script using sudo"
     exit 1
 fi
+$user=$SUDO_USER
 
 # arg checking
 if [[ ! -f "$1" ]]; then
@@ -55,7 +56,7 @@ chmod 644 "/usr/share/backgrounds/$img"
 echo "setting up .conf files"
 
 echo "[Seat:*]
-autologin-user=krem
+autologin-user=$user
 autologin-session=xfce
 greeter-session=lightdm-gtk-greeter" > /etc/lightdm/lightdm.conf
 
@@ -63,7 +64,10 @@ echo "[greeter]
 theme-name = Adwaita-dark
 icon-theme-name = ePapirus-Dark
 font-name = Sans 12
-background = /usr/share/backgrounds/lockscreen-bg-fhd.png" > /etc/lightdm/lightdm-gtk-greeter.conf
+background = $img
+clock-format = %H:%M
+indicators = ~host;~spacer;~clock;~spacer;~layout;~separator;~session;~power" > /etc/lightdm/lightdm-gtk-greeter.conf
 
-# remove override background
-mv /usr/share/backgrounds/xfce/{xfce,_xfce}-shapes.svg
+
+# rename override background
+mv /usr/share/backgrounds/xfce/{,_}xfce-shapes.svg

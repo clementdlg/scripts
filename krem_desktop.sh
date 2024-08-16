@@ -1,6 +1,6 @@
 # check privileges
 if [[ $EUID -ne 0 ]]; then
-    echo "Error: Run this script with root priviledges"
+    echo "Error: Run this script with root privileges"
     exit 1
 fi
 
@@ -15,14 +15,24 @@ fi
 source scripts/shell_logger.sh
 
 # edit dnf config
-echo "[main]
-    gpgcheck=True
-    installonly_limit=3
-    clean_requirements_on_remove=True
-    best=False
-    skip_if_unavailable=True
-    fastestmirror=true
-    max_parallel_downloads=20" > /etc/dnf/dnf.conf
+if ! grep 'fastestmirror=true' /etc/dnf/dnf.conf; then
+
+    if grep 'fastestmirror=false' /etc/dnf/dnf.conf; then
+	sed -i 's/fastestmirror=false/fastestmirror=true/' /etc/dnf/dnf.conf
+    else
+	echo "fastestmirror=true" >> /etc/dnf/dnf.conf
+    fi
+fi
+
+if ! grep 'max_parallel_downloads=20' /etc/dnf/dnf.conf; then
+
+    if grep -E 'max_parallel_downloads=[0-9]+$' /etc/dnf/dnf.conf ; then
+	sed -i -E 's/max_parallel_downloads=[0-9]+$/max_parallel_downloads=20/' /etc/dnf/dnf.conf
+    else
+	echo "max_parallel_downloads=20" >> /etc/dnf/dnf.conf
+    fi
+fi
+
 
 # ./pkg_installer.sh
 
