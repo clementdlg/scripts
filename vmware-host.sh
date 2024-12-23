@@ -1,7 +1,11 @@
-repo="https://github.com/nan0desu/vmware-host-modules.git"
-branch="workstation-17.5.2-k6.9+"
+url="https://github.com/bytium/vm-host-modules"
+branch="17.6.1"
+
+echo "VMware Workstation host modules compiler script"
+echo "Using repo '$(echo $url | sed 's/https:\/\/github.com\///')'"
 
 workdir="/tmp"
+repo=$(basename $url)
 
 # check if run as root
 if [[ $EUID -ne 0 ]]; then
@@ -10,19 +14,18 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 # clean previous
-if [[ -d "$workdir/vmware-host-modules" ]]; then
-    rm -rf "$workdir/vmware-host-modules" >/dev/null
+if [[ -d "$workdir/$repo" ]]; then
+    rm -rf "$workdir/$repo" >/dev/null
 fi
 
-# cloning repo
-git -C "$workdir" clone --branch $branch --depth 1 $repo >/dev/null
+# cloning from url
+git -C "$workdir" clone --branch $branch --depth 1 $url >/dev/null
 
-# going to the repo 
-cd $workdir/vmware-host-modules/
+cd $workdir/$repo
 
 # compiling
 make >/dev/null
 make install >/dev/null
 
 # cleaning
-rm -rf "$workdir/vmware-host-modules" >/dev/null
+rm -rf "$workdir/$repo" >/dev/null

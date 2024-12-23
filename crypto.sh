@@ -11,7 +11,7 @@ if [[ ! -n "$2" ]]; then
 	exit 1
 fi
 
-precision="2"
+precision="3"
 baseurl="https://api.coingecko.com"
 
 url="$baseurl/api/v3/simple/price?ids=$crypto&vs_currencies=$fiat&precision=$precision"
