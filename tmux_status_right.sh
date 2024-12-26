@@ -19,7 +19,9 @@ sess=" $sess"
 sess="$s$sess$e"
 
 # wireguard
-if [[ -n $(wg show 2>&1) ]]; then
+wg=$(wg show 2>&1)
+res="$?"
+if [[ -n $wg && $res -ne 127 ]]; then
 	wg="󰞉 wireguard"
 	wg="$s$wg$e"
 fi
