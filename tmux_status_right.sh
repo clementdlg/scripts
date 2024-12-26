@@ -26,5 +26,11 @@ if [[ -n $wga && $res -ne 127 ]]; then
 	wg="$s$wg$e"
 fi
 
+# hostname
+host="$s󰍹 $(hostname)$e"
+
+# hostname
+user="$s $(whoami)$e"
+
 # output
-echo "$colo$wg$distro$git$sess"
+echo "$colo$wg$git$user$host$sess"
