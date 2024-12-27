@@ -53,7 +53,7 @@ workdir="/tmp/neovim/"
 mkdir -p $workdir
 
 echo "Cloning git repo"
-git clone https://github.com/neovim/neovim "$workdir"
+git clone https://github.com/neovim/neovim "$workdir" &>/dev/null
 
 if [[ $? -ne 0 ]]; then
 	echo "Error: git clone failed"
@@ -65,13 +65,13 @@ cd "$workdir"
 
 
 # select type of build
-make CMAKE_BUILD_TYPE=Release
+make CMAKE_BUILD_TYPE=Release &>/dev/null
 
 # select the right branch
-git checkout stable
+git checkout stable &>/dev/null
 
 echo "Building..."
-make install >/dev/null 2> nvim_build.log
+make install >/dev/null 2> $workdir/nvim_build.log
 
 if [[ $? -ne 0 ]]; then
 	echo "Error: Failed to build, more info in $workdir/nvim_build.log"
