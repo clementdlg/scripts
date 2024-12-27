@@ -20,7 +20,7 @@ if [[ $distro == "fedora" ]]; then
 		"git"
 	)
 
-	cmd="dnf install $tool -y &>/dev/null"
+	install="dnf install -y"
 
 elif [[ $distro == "debian" ]]; then
 
@@ -34,17 +34,17 @@ elif [[ $distro == "debian" ]]; then
 		"git"
 	)
 
-	cmd="apt install $tool -y &>/dev/null"
+	install="apt install -y"
 else
 	echo "Only Fedora and Debian are supported yet"
 	exit 1
 fi
 
 for tool in "${tools[@]}"; do
-	$cmd
+	$install $tool &>/dev/null
 
 	if [[ $? -ne 0 ]];then
-		echo "Error while trying to install $tool" >&2
+		echo "Error while trying to install $tool"
 		exit 1
 	fi
 done
