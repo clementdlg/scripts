@@ -7,7 +7,7 @@ fi
 echo "Installing build tools..."
 
 distro=$(cat /etc/os-release | grep '^ID' | cut -d= -f2)
-if [[ $distro == "fedora" ]]; then
+if [[ $distro == "fedora" || $distro == "rhel" ]]; then
 	tools=(
 		"ninja-build"
 		"cmake"
@@ -22,7 +22,7 @@ if [[ $distro == "fedora" ]]; then
 
 	install="dnf install -y"
 
-elif [[ $distro == "debian" ]]; then
+elif [[ $distro == "debian" || $distro == "ubuntu" ]]; then
 
 	tools=(
 		"ninja-build"
@@ -36,7 +36,8 @@ elif [[ $distro == "debian" ]]; then
 
 	install="apt install -y"
 else
-	echo "Only Fedora and Debian are supported yet"
+	echo "Error : Unsupported distro '$distro'"
+	echo "Currently supported distro : Fedora, RHEL, Debian, Ubuntu"
 	exit 1
 fi
 
@@ -66,16 +67,18 @@ cd "$workdir"
 # select the right branch
 git checkout stable &>/dev/null
 
+echo "Setting up build configuration..."
 # select type of build
 make CMAKE_BUILD_TYPE=Release &>/dev/null
 
 echo "Building..."
-make install >/dev/null 2> "$workdir/nvim_build.log"
+make install 2> "$workdir/nvim_build.log" >/dev/null
 
 if [[ $? -ne 0 ]]; then
 	echo "Error: Failed to build, more info in $workdir/nvim_build.log"
 	tail -5 "$workdir/nvim_build.log"
+	exit 1
 fi
 
-echo "Build successful! Cleaning..."
-# rm -rf "$workdir"
+echo "Build successful! Cleaning"
+rm -rf "$workdir"
