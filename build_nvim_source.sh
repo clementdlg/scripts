@@ -63,15 +63,14 @@ fi
 # still dont know how to avoid using cd with make
 cd "$workdir"
 
+# select the right branch
+git checkout stable &>/dev/null
 
 # select type of build
 make CMAKE_BUILD_TYPE=Release &>/dev/null
 
-# select the right branch
-git checkout stable &>/dev/null
-
 echo "Building..."
-make install >/dev/null 2> $workdir/nvim_build.log
+make install >/dev/null 2> "$workdir/nvim_build.log"
 
 if [[ $? -ne 0 ]]; then
 	echo "Error: Failed to build, more info in $workdir/nvim_build.log"
@@ -79,4 +78,4 @@ if [[ $? -ne 0 ]]; then
 fi
 
 echo "Build successful! Cleaning..."
-rm -rf "$workdir"
+# rm -rf "$workdir"
