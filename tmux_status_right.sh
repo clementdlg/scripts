@@ -27,7 +27,7 @@ if [[ -n $wga && $res -ne 127 ]]; then
 fi
 
 # hostname
-host="$s󰍹 $(hostname)$e"
+host="$s󰇄 $(hostname)$e"
 
 # hostname
 user="$s $(whoami)$e"
