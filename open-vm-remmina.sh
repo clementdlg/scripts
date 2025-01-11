@@ -3,7 +3,33 @@
 # this script is used to connect to VMs running the Spice server
 
 # viewer command
-viewer="flatpak run org.remmina.Remmina -c"
+viewer() {
+
+which remmina &>/dev/null
+if [[ $? -eq 0 ]]; then
+	echo "remmina -c"
+	return
+fi
+
+which flatpak &>/dev/null
+if [[ $? -ne 0 ]]; then
+	return
+fi
+
+flatpak list | grep remmina >/dev/null
+if [[ $? -eq 0 ]]; then
+	echo "flatpak run org.remmina.Remmina -c"
+	return
+fi
+return
+}
+
+viewerCmd=$(viewer)
+
+if [[ -z "$viewerCmd" ]]; then
+	echo "Error : Remmina is not installed"
+	exit 1
+fi
 
 # menu command
 which rofi &>/dev/null
@@ -36,4 +62,4 @@ fi
 spice=$(virsh domdisplay --domain "$vm")
 
 # opening display
-$viewer $spice &>/dev/null
+$viewerCmd $spice &>/dev/null
