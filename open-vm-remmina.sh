@@ -2,6 +2,8 @@
 
 # this script is used to connect to VMs running the Spice server
 
+uri="qemu:///system"
+
 # viewer command
 viewer() {
 
@@ -43,7 +45,7 @@ fi
 menu="rofi show -dmenu"
 
 # running vms
-running=$(virsh list | tail -n +3 | head -n -1 | awk '{print $2}')
+running=$(virsh -c "$uri" list | tail -n +3 | head -n -1 | awk '{print $2}')
 
 # if no vms are active, exit
 if [[ -z "$running" ]]; then
@@ -59,7 +61,7 @@ if [[ -z "$vm" ]]; then
 fi
 
 # getting spice address
-spice=$(virsh domdisplay --domain "$vm")
+spice=$(virsh -c "$uri" domdisplay --domain "$vm")
 
 # opening display
 $viewerCmd $spice &>/dev/null
