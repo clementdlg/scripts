@@ -1,0 +1,35 @@
+#!/bin/env bash
+
+# Description : show all the commits using FZF, including diff preview
+
+function isInstalled() {
+	if [[ -z "$1" ]]; then
+		return 1
+	fi
+
+	if ! which "$1" &>/dev/null; then
+		echo "gitlog error : $1 is not installed"
+		return 1
+	fi
+	return 0
+}
+
+isInstalled "git" || exit 1
+isInstalled "fzf" || exit 1
+
+# must be inside a git repo
+if ! git -C $(pwd) rev-parse --is-inside-work-tree &> /dev/null; then
+	echo "gitlog error : you are not in a git repo"
+	exit 1
+fi
+
+git log \
+	--color=always \
+	--reverse \
+	--oneline \
+	--format="%C(auto)%h %C(reset)%s" \
+	--reverse |\
+fzf --no-multi \
+	--ansi \
+	--preview="git show --color=always \$(echo {} | awk '{ print \$1 }')"
+

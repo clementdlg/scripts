@@ -1,20 +1,25 @@
 #!/bin/env bash
 
 # Description : this utility connects to a wireguard tunnel via a FZF menu
+function isInstalled() {
+	if [[ -z "$1" ]]; then
+		return 1
+	fi
+
+	if ! which "$1" &>/dev/null; then
+		echo "quick-wg error : $1 is not installed"
+		return 1
+	fi
+	return 0
+}
+
 if [[ $EUID -ne 0 ]]; then
-	echo "wireg error : the script must be run as root"
+	echo "quick-wg error : the script must be run as root"
 	exit 0
 fi
 
-if which fzf &>/dev/null; then
-	echo "wireg error : fzf is not installed"
-	exit 1
-fi
-
-if which wireguard &>/dev/null; then
-	echo "wireg error : wireguard is not installed"
-	exit 1
-fi
+isInstalled "fzf" || exit 1
+isInstalled "wg" || exit 1
 
 path="/etc/wireguard"
 confs=$(ls "$path")
@@ -26,7 +31,7 @@ select=$(printf "%s\n" "$confs" |\
 			--height 35%)
 
 if [[ -z "$select" ]]; then
-	echo "wgz error : No selection"
+	echo "quick-wg error : No selection"
 	exit 0
 fi
 # start the connection
