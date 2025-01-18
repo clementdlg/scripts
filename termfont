@@ -1,0 +1,23 @@
+#!/bin/env bash
+
+# Description : this scripts modify the font size setting inside the config file of alacritty using in place SED editing
+
+termconf="$HOME/.config/alacritty/alacritty.toml" # config file path
+
+# exit if file doesn't exists
+[[ ! -f "$termconf" ]] && exit
+
+# must be only 1 argument
+if [[ $# -ne 1 ]]; then
+	echo "termfont error : Invalid number of arguments. Expected 1, got $#"
+	exit 0
+fi
+
+# the argument must be between 10 and 99
+if [[ ! "$1" =~ ^[1-9][0-9]$ ]]; then
+	echo "termfont error : Invalid font size. Expected a number betwen 10 and 99, got $1"
+	exit 0
+fi
+
+# perform the edit
+sed -i -E "s/size = [0-9.]+/size = $1.0/" "$termconf"

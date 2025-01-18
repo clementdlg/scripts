@@ -1,0 +1,22 @@
+#!/bin/env bash
+
+if which fzf &>/dev/null; then
+	echo "wireg error : fzf is not installed"
+	exit 1
+fi
+
+dirs=(
+	"$HOME/scripts" 
+	"$HOME/.config"
+	"$HOME/github"
+)
+
+list=$(find "${dirs[@]}" -maxdepth 4 -type f -not -path '*/.git*')
+edit=$(printf "%s\n" "$list" | sed 's|/home/krem/||')
+select=$(printf "%s\n" $edit | fzf --reverse --height 40%)
+
+if [[ ! -f "$HOME/$select" ]]; then
+	echo "viz error : Non existant file"
+	exit 1
+fi
+$EDITOR $HOME/$select

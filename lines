@@ -1,0 +1,22 @@
+#!/bin/env bash
+# Description : this utility counts the number of lines in sources files
+
+# if no arguments, exit
+if [[ -z $1 ]]; then
+	echo "Error: You must pass the file extension as argument"
+	echo "Example : 'lines php'"
+	exit 0
+fi
+
+# find all files with matching extension
+files=$(find -not -path './.git/*' -name "*.$1" 2>/dev/null)
+
+# if no files, exit
+if [[ -z "$files" ]]; then
+	echo "0 total"
+	exit 0
+fi
+
+wc="$(wc -l $files 2>/dev/null)"
+pretty=$(echo "$wc" | sed 's|\./||' )
+echo "$pretty" | awk '{print "\033[1;36m" $1"\033[0m", $2}'
