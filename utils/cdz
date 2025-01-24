@@ -1,6 +1,8 @@
 #!/bin/env bash
 
 # Description : change directory using FZF
+# Usage : this script is used via the `source` command
+
 if ! which fzf &>/dev/null; then
 	echo "cdz error : fzf is not installed"
 	exit 1
@@ -14,7 +16,7 @@ list=$(find "$dir" -maxdepth 2 -type d -not -path '*/.git*')
 select=$(printf "%s\n" "$list" | fzf --reverse --height 40%)
 
 if [[ ! -d "$select" ]]; then
-	echo "cdz error : Non existant file"
+	echo "cdz error : Non existant path"
 	exit 1
 fi
 
