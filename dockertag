@@ -1,0 +1,32 @@
+#!/bin/env bash
+
+# check arguments
+img="$1"
+if [[ ! "$img" =~ [a-zA-Z/]{1,50} ]]; then
+	echo "Error: Invalid image name '$1'"
+	exit 1
+fi
+
+if ! which jq &>/dev/null; then
+	echo "Error: 'jq' is a dependency of this script"
+fi
+
+# define endpoint
+registry="https://hub.docker.com"
+endpoint="$registry/v2/repositories/library/$img/tags?page_size=100"
+
+# execute request
+req=$(curl -s "$endpoint")
+if [[ -z "$req" ]]; then
+	echo "Error : Response is empty"
+	exit 1
+fi
+
+# prepare output
+banwords=("unstable|buggy|testing|experimental|latest")
+parsed=$(echo "$req" | jq -r '.results[].name' | grep -vE "$banwords" | sort -n)
+
+
+# display
+echo "$parsed"
+exit 0
