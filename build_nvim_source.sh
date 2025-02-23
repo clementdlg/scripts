@@ -54,7 +54,7 @@ workdir="/tmp/neovim/"
 mkdir -p $workdir
 
 echo "Cloning git repo"
-git clone https://github.com/neovim/neovim "$workdir" &>/dev/null
+git clone --branch stable --single-branch https://github.com/neovim/neovim "$workdir" &>/dev/null
 
 if [[ $? -ne 0 ]]; then
 	echo "Error: git clone failed"
@@ -65,7 +65,8 @@ fi
 cd "$workdir"
 
 # select the right branch
-git checkout stable &>/dev/null
+# git checkout stable &>/dev/null
+
 
 echo "Setting up build configuration..."
 # select type of build
