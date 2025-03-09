@@ -2,31 +2,44 @@
 
 # check arguments
 img="$1"
+fmt="$2"
+
 if [[ ! "$img" =~ [a-zA-Z/]{1,50} ]]; then
 	echo "Error: Invalid image name '$1'"
 	exit 1
 fi
 
+# prerequisit
 if ! which jq &>/dev/null; then
 	echo "Error: 'jq' is a dependency of this script"
 fi
 
+# output format
+numeric=0
+if [[ "$2" == "-n" ]]; then
+	numeric=1
+fi
+
 # define endpoint
 registry="https://hub.docker.com"
-endpoint="$registry/v2/repositories/library/$img/tags?page_size=100"
+endpoint="$registry/v2/repositories/library/$img/tags?page_size=60"
 
 # execute request
 req=$(curl -s "$endpoint")
+
 if [[ -z "$req" ]]; then
 	echo "Error : Response is empty"
+	echo "Error : enpoint = '$endpoint'"
 	exit 1
 fi
 
 # prepare output
-banwords=("unstable|buggy|testing|experimental|latest")
-parsed=$(echo "$req" | jq -r '.results[].name' | grep -vE "$banwords" | sort -n)
-
+parsed=$(echo "$req" | jq -r '.results[].name' | sort -n)
 
 # display
-echo "$parsed"
+if ((numeric)); then
+	echo "$parsed" | grep -E "^[0-9].*$"
+else
+	echo "$parsed"
+fi
 exit 0
