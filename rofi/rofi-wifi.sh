@@ -24,13 +24,12 @@ silent() {
 }
 
 get_wifi_list() {
-	local wifi_list="$(nmcli --fields "SIGNAL,SSID" device wifi list)"
+	local wifi_list="$(nmcli -t -f "SIGNAL,SSID" device wifi list)"
 
 	printf "%s\n" "$wifi_list" \
-		| sed 1d \
+		| grep -v ":$" \
 		| head -15 \
-		| awk '$2 != "--"' \
-		| awk '{ \
+		| awk -F: '{ \
 		if ($1 >= 0 && $1 < 25) $1 = "󰤯 "; \
 		else if ($1 >= 25 && $1 < 50) $1 = "󰤟 "; \
 		else if ($1 >= 50 && $1 < 75) $1 = "󰤢 "; \
@@ -42,9 +41,9 @@ connect() {
 	notify "Scanning Wi-Fi networks..."
 
 	list=$(get_wifi_list)
-	printf "%s\n" "$list" # debug
 
 	choice=$(echo -e "$list" | uniq | rofi -dmenu -i -p "Wi-Fi SSID: " )
+	echo "choice = $choice"
 
 	read -r choice_clean <<< "${choice:2}"
 	
