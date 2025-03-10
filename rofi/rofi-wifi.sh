@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
-
-# globals
-disable="󰖪  Disable Wi-Fi"
-enable="󰖩  Enable Wi-Fi"
+set -xeuo pipefail
 
 function isInstalled() {
 	[[ -z "$1" ]] && return 1
@@ -14,12 +10,17 @@ function isInstalled() {
 	fi
 	return 0
 }
+
 notify() {
 	message="$1"
 	[[ -z "$message" ]] && return
 
 	icon="/usr/share/icons/Papirus/64x64/devices/network-wireless.svg"
 	notify-send -i "$icon" "Wifi Applet" "$message"
+}
+
+silent() {
+	"$@" &>/dev/null
 }
 
 get_wifi_list() {
@@ -37,17 +38,7 @@ get_wifi_list() {
 		print}'
 }
 
-toggle_wifi() {
-	local connected=$(nmcli --colors=no radio wifi)
-	if [[ "$connected" == "enabled" ]]; then
-		local toggle="$disable"
-	else
-		local toggle="$enable"
-	fi
-	echo "$toggle"
-}
-
-main() {
+connect() {
 	notify "Scanning Wi-Fi networks..."
 
 	isInstalled nmcli
@@ -56,8 +47,7 @@ main() {
 	isInstalled notify-send
 
 	list=$(get_wifi_list)
-
-	# printf "%s\n" "$list" # debug
+	printf "%s\n" "$list" # debug
 
 	choice=$(echo -e "$list" | uniq | rofi -dmenu -i -p "Wi-Fi SSID: " )
 
@@ -74,7 +64,69 @@ main() {
 	notify "Successfully connected to '$choice_clean'"
 }
 
+menu_enabled() {
+	# check if already connected to a wifi
+	local current="$(nmcli -t -f NAME,TYPE connection show --active | grep '802-11' | cut -f1 -d:)"
+
+	# menu items
+	local disconnect="󰤭 Disconnect from '$current'"
+	local connect=" Connect to Wi-Fi"
+	local hidden="󰤨 Connect to hidden Wi-Fi"
+	local disable=" Disable Wi-Fi"
+	local editor="󰘙 Connection Editor"
+
+	# menu
+	local menu="$connect\n$hidden\n$disable\n$editor\n"
+
+	# add disconnect item
+	if [[ ! -z "$current" ]]; then
+		menu="$disconnect\n$menu"
+	fi
+
+	local choice=$(printf "$menu" | rofi -dmenu)
+
+	case "$choice" in
+		"$disconnect")
+			nmcli connection down "$current"
+			notify "Disconnected from '$current'"
+			;;
+		"$connect")
+			connect ;;
+		"$hidden")
+			echo "this was choice 3" ;;
+		"$disable")
+			nmcli radio wifi off
+			notify "Wi-Fi has been disabled"
+			;;
+		"$editor")
+			silent nm-connection-editor & ;;
+	esac
+}
+
+menu_disabled() {
+	enable="󰖩 Enable Wi-Fi"
+	editor="󰘙 Connection Editor"
+	choice=$(printf "$enable\n$editor\n" | rofi -dmenu)
+
+	case "$choice" in
+		"$enable")
+			nmcli radio wifi on
+			notify "Wi-Fi has been enabled"
+			;;
+		"$editor")
+			silent nm-connection-editor & ;;
+	esac
+}
+
+main() {
+	local state=$(nmcli --colors=no radio wifi)
+
+	if [[ "$state" == "enabled" ]]; then
+		menu_enabled
+	else
+		menu_disabled
+	fi
+
+}
+
 main
-
-# printf "Wi-Fi list\nDisconnect from 'current'\nDisable Wi-Fi\nConnect to hidden Wi-Fi\nConnection Editor\n" | rofi -dmenu
-
