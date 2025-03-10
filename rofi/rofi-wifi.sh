@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -xeuo pipefail
 
-function isInstalled() {
+function is_installed() {
 	[[ -z "$1" ]] && return 1
 
 	if ! which "$1" &>/dev/null; then
@@ -42,7 +42,7 @@ connect() {
 
 	list=$(get_wifi_list)
 
-	choice=$(echo -e "$list" | uniq | rofi -dmenu -i -p "Wi-Fi SSID: " )
+	choice=$(echo -e "$list" | uniq | rofi -dmenu -i -p "Wi-Fi Connection:" )
 	echo "choice = $choice"
 
 	read -r choice_clean <<< "${choice:2}"
@@ -51,11 +51,17 @@ connect() {
 	if nmcli -g NAME connection | grep $choice_clean; then
 		nmcli connection up id "$choice_clean"
 	else
-		password=$(rofi -dmenu -p "Password: ")
+		password=$(echo "" | rofi -dmenu -p "Password:")
 		nmcli device wifi connect "$choice_clean" password "$password"
 	fi
 
 	notify "Successfully connected to '$choice_clean'"
+}
+
+connect_hidden() {
+	local ssid=$(echo "" | rofi -dmenu -p "Wi-Fi Name (ssid) :")
+	local password=$(echo "" | rofi -dmenu -p "Wi-Fi Name (ssid) :")
+	nmcli device wifi connect "$ssid" password "$password"
 }
 
 menu_enabled() {
@@ -77,7 +83,7 @@ menu_enabled() {
 		menu="$disconnect\n$menu"
 	fi
 
-	local choice=$(printf "$menu" | rofi -dmenu)
+	local choice=$(printf "$menu" | rofi -dmenu -p "Wi-Fi Applet:" )
 
 	case "$choice" in
 		"$disconnect")
@@ -87,7 +93,7 @@ menu_enabled() {
 		"$connect")
 			connect ;;
 		"$hidden")
-			echo "this was choice 3" ;;
+			connect_hidden ;;
 		"$disable")
 			nmcli radio wifi off
 			notify "Wi-Fi has been disabled"
@@ -100,7 +106,7 @@ menu_enabled() {
 menu_disabled() {
 	enable="󰖩 Enable Wi-Fi"
 	editor="󰘙 Connection Editor"
-	choice=$(printf "$enable\n$editor\n" | rofi -dmenu)
+	choice=$(printf "$enable\n$editor\n" | rofi -dmenu -p "Wi-Fi Applet:" )
 
 	case "$choice" in
 		"$enable")
@@ -113,10 +119,10 @@ menu_disabled() {
 }
 
 main() {
-	isInstalled nmcli
-	isInstalled nm-applet
-	isInstalled rofi
-	isInstalled notify-send
+	is_installed nmcli
+	is_installed nm-applet
+	is_installed rofi
+	is_installed notify-send
 
 	local state=$(nmcli --colors=no radio wifi)
 
@@ -125,7 +131,6 @@ main() {
 	else
 		menu_disabled
 	fi
-
 }
 
 main
