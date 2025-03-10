@@ -41,11 +41,6 @@ get_wifi_list() {
 connect() {
 	notify "Scanning Wi-Fi networks..."
 
-	isInstalled nmcli
-	isInstalled nm-applet
-	isInstalled rofi
-	isInstalled notify-send
-
 	list=$(get_wifi_list)
 	printf "%s\n" "$list" # debug
 
@@ -119,6 +114,11 @@ menu_disabled() {
 }
 
 main() {
+	isInstalled nmcli
+	isInstalled nm-applet
+	isInstalled rofi
+	isInstalled notify-send
+
 	local state=$(nmcli --colors=no radio wifi)
 
 	if [[ "$state" == "enabled" ]]; then
