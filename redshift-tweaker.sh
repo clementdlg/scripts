@@ -19,7 +19,10 @@ DESCRIPTION
 		display this screen
 
 	-b, --brightness [VALUE]
-		Changes the brightness
+		Changes the brightness-night value
+
+	-g, --gamma [VALUE]
+		Changes the gamma value
 
 	VALUE
 		Can be in the form of an integer. Can also be using integer increments or decrements.
@@ -52,23 +55,29 @@ checkConfig() {
 	fi
 }
 
-modifyBrightness() {
-	sed -iE "s/^brightness-night=0\..*$/brightness-night=0.$1/" "$_CONFIG_PATH"
+setIntParam() {
+	if grep "^$1=0\..*$" "$_CONFIG_PATH"; then
+		sed -iE "s/^$1=0\..*$/$1=0.$2/" "$_CONFIG_PATH"
+	else
+		echo "[Error] Param '$1' not found"
+		return 1
+	fi
 }
 
-changeBrightness() {
+changeIntParam() {
 
 	# modes :
 	# - absolute : set an int value
 	# - relative : add or substract to the current value
 
 	# $1 = [mode|none][int]
+	key="$1"
+	int="$2"
 	mode="absolute"
 	sign=""
-	int="$1"
 
 	# get mode
-	if [[ "$1" == "+"*  || "$1" == "-"*  ]]; then
+	if [[ "$2" == "+"*  || "$2" == "-"*  ]]; then
 		mode="relative"
 	fi
 
@@ -79,19 +88,19 @@ changeBrightness() {
 	fi
 
 	if [[ ! "$int" =~ ^[0-9]+$ ]] || (( int < 0 || int > 99 )); then
-		echo "[Error] Cannot set brightness, failed to parse integer"
-		exit 1
+		echo "[Error] Cannot set param '$name', failed to parse integer value"
+		return 1
 	fi
 
 	if [[ "$mode" == "absolute" ]]; then
-		modifyBrightness "$int"
+		setIntParam "$key" "$int"
 	else
 		if [[ "$sign" != "+" && "$sign" != "-" ]]; then
 			echo "[Error] Invalid sign"
-			exit 1
+			return 1
 		fi
 		
-		value="$(grep "brightness-night" "$_CONFIG_PATH" | cut -d= -f2 | cut -d. -f2 )"
+		value="$(grep "$key" "$_CONFIG_PATH" | cut -d= -f2 | cut -d. -f2 )"
 
 		if [[ "$sign" == "+" ]]; then
 			value="$(( value + int ))"
@@ -99,12 +108,12 @@ changeBrightness() {
 			value="$(( value - int ))"
 		fi
 
-		modifyBrightness "$value"
+		setIntParam "$key" "$value"
 	fi
 
 	systemctl --user restart redshift.service
 
-	echo "[INFO] Brightness sucessfully changed"
+	echo "[INFO] Param '$key' sucessfully changed"
 }
 
 main() {
@@ -130,8 +139,17 @@ main() {
 	checkConfig
 
 	if [[ "$1" == "--brightness" ||  "$1" == "-b" ]]; then
-		changeBrightness "$2"
+		changeIntParam "brightness-night" "$2"
+		exit 0
 	fi
+
+	if [[ "$1" == "--gamma" ||  "$1" == "-g" ]]; then
+		changeIntParam "gamma" "$2"
+		exit 0
+	fi
+
+	echo "[Error] Unrecognized argument '$1'"
+	exit 0
 }
 
 main "$@"
