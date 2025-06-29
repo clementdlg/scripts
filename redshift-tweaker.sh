@@ -75,6 +75,7 @@ changeIntParam() {
 	int="$2"
 	mode="absolute"
 	sign=""
+	value=""
 
 	# get mode
 	if [[ "$2" == "+"*  || "$2" == "-"*  ]]; then
@@ -87,30 +88,34 @@ changeIntParam() {
 		int="${int:1}"
 	fi
 
-	if [[ ! "$int" =~ ^[0-9]+$ ]] || (( int < 0 || int > 99 )); then
-		echo "[Error] Cannot set param '$name', failed to parse integer value"
-		return 1
-	fi
-
 	if [[ "$mode" == "absolute" ]]; then
-		setIntParam "$key" "$int"
+		value="$int"
 	else
+		# mode relative
 		if [[ "$sign" != "+" && "$sign" != "-" ]]; then
 			echo "[Error] Invalid sign"
 			return 1
 		fi
 		
+		# get current value
 		value="$(grep "$key" "$_CONFIG_PATH" | cut -d= -f2 | cut -d. -f2 )"
 
+		# add or substract
 		if [[ "$sign" == "+" ]]; then
 			value="$(( value + int ))"
 		else
 			value="$(( value - int ))"
 		fi
 
-		setIntParam "$key" "$value"
 	fi
 
+	# verify integer value before inserting
+	if [[ ! "$value" =~ ^[0-9]+$ ]] || (( value < 1 || value > 99 )); then
+		echo "[Error] Cannot set param '$key', failed to parse integer value"
+		return 1
+	fi
+
+	setIntParam "$key" "$value"
 	systemctl --user restart redshift.service
 
 	echo "[INFO] Param '$key' sucessfully changed"
