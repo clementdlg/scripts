@@ -32,9 +32,11 @@ install_ssh() {
 		return 1
 	fi
 
-	if ! ssh -V &>/dev/null; then
+	local pkg_name="openssh-server"
+
+	if ! rpm -q "$pkg_name" &>/dev/null; then
 		echo "[Info] Installing openssh"
-		dnf install -y openssh >/dev/null
+		dnf install -y openssh-server >/dev/null
 	fi
 
 	systemctl enable --now sshd
