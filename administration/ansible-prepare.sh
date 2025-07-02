@@ -3,6 +3,7 @@
 set -xeuo pipefail
 
 _USERNAME="ansible"
+unique_str="$(date +%H%M%S)"
 
 usage() {
 cat <<EOF
@@ -26,40 +27,41 @@ EOF
 }
 
 install_ssh() {
-	local distro="$(cat /etc/os-release | grep "^ID" | cut -d= -f2)"
-
-	if [[ "$distro" != "fedora" && \
-		"$distro" != "rhel" && \
-		"$distro" != "rocky" ]]; then
-		echo "[Exit] Unsupported linux distribution '$distro'."
+	if ! dnf --version &>/dev/null; then
+		echo "[Exit] This script only supports installing packages using dnf."
 		return 1
 	fi
 
-	dnf install -y openssh
+	if ! ssh -V &>/dev/null; then
+		echo "[Info] Installing openssh"
+		dnf install -y openssh >/dev/null
+	fi
 
 	systemctl enable --now sshd
 }
 
 install_python() {
-	dnf install -y python3
-
-	if ! python3 --version &>/dev/null; then
-		echo "$0 Error: Failed to install python"
-		return 1
+	if python3 --version &>/dev/null; then
+		echo "[Info] python3 already installed. Skipping."
+		return 0
 	fi
+
+	echo "[Info] Installing python3"
+	dnf install -y python3 >/dev/null
 }
 
 configure_sshd() {
 	local sshd="/etc/ssh/sshd_config"
+	local backup="${sshd}.bkp-$unique_str"
 
 	# check the config before doing anything
-	if ! sshd -t; then
+	if ! sshd -t &>/dev/null; then
 		echo "Error: Invalid sshd_config file. Aborting"
-		exit 1
+		return 1
 	fi
 
 	# create a backup
-	cp "$sshd" "${sshd}.bkp" 
+	cp "$sshd" "$backup" 
 
 	# disable password authentification
 	if grep -E "^PasswordAuthentication (yes|no)$" "$sshd"; then
@@ -69,15 +71,28 @@ configure_sshd() {
 	fi
 
 	# if config is invalid, replace by backup
-	if ! sshd -t; then
-		mv "${sshd}.bkp" "$sshd"
+	if ! sshd -t &>/dev/null; then
+		mv "$backup" "$sshd"
+		return 1
 	fi
+
+	# remove backup
+	rm "$backup"
+
+	echo "[Info] Disabled PasswordAuthentication for sshd"
 }
 
 create_user() {
+	if grep "$_USERNAME" /etc/passwd; then
+		echo "[Info] User named '$_USERNAME' already exists. Skipping."
+		return 0
+	fi
+
 	useradd -Um "$_USERNAME"
 	usermod -aG wheel "$_PASSWORD"
 	echo "$_USERNAME:$_PASSWORD" | chpasswd
+
+	echo "[Info] Created user '$_USERNAME'"
 }
 
 main() {
@@ -97,6 +112,8 @@ main() {
 	install_python
 	configure_sshd
 	create_user
+
+	echo "[Exit] Execution sucessful"
 }
 
 main "$@"
