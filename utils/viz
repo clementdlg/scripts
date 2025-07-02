@@ -9,6 +9,7 @@ dirs=(
 	"$HOME/scripts" 
 	"$HOME/.config"
 	"$HOME/github"
+	"$HOME/docker"
 )
 
 list=$(find "${dirs[@]}" -maxdepth 4 -type f -not -path '*/.git*')
