@@ -2,7 +2,7 @@
 
 # Description : The purpose for this script is to allow to adjust the brightness setting for redshift systemd daemon
 
-set -xeuo pipefail
+set -euo pipefail
 # global variables
 _CONFIG_PATH=""
 
@@ -10,7 +10,7 @@ printHelp() {
 	cat <<EOF
 NAME : redshift-tweaker
 SYNOPSIS :
-	redshift-tweaker [--setting] [VALUE]
+	redshift-tweaker [--<key> [+|-]<int> ] [--help]
 
 DESCRIPTION
 	Tweak the configuration of redshift and restart it automatically to apply the modification in real time
@@ -18,18 +18,19 @@ DESCRIPTION
 	--help
 		display this screen
 
-	-b, --brightness [VALUE]
+	-b, --brightness [+|-]<int>
 		Changes the brightness-night value
 
-	-g, --gamma [VALUE]
+	-g, --gamma [+|-]<int>
 		Changes the gamma value
 
-	VALUE
-		Can be in the form of an integer. Can also be using integer increments or decrements.
-		Example : \"redshift-tweaker -b +2\"
+EXAMPLES
+	Set brightness to 6 : "redshift-tweaker -b 6"
+	Increase gamma by 2 : "redshift-tweaker -g +2"
 	
 AUTHOR
-	Clément de la Genière. 2025
+	Clément de la Genière
+	2025
 EOF
 }
 
@@ -110,13 +111,14 @@ changeIntParam() {
 	fi
 
 	# verify integer value before inserting
-	if [[ ! "$value" =~ ^[0-9]+$ ]] || (( value < 1 || value > 99 )); then
+	if [[ ! "$value" =~ ^[0-9]+$ ]] || (( value < 0 || value > 100 )); then
 		echo "[Error] Cannot set param '$key', failed to parse integer value"
 		return 1
 	fi
 
 	setIntParam "$key" "$value"
-	systemctl --user restart redshift.service
+
+	notify-send "Redshift-tweaker" "$key set to $value"
 
 	echo "[INFO] Param '$key' sucessfully changed"
 }
