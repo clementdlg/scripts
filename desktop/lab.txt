@@ -1,0 +1,8 @@
+# user:hostname:ip:port:protocol:opt
+krem:web01:192.168.102.10:12222:ssh:~/.ssh/hardening-kev
+krem:web02:192.168.102.11:12222:ssh:~/.ssh/hardening-kev
+krem:hap01:192.168.102.20:12222:ssh:~/.ssh/hardening-kev
+krem:hap02:192.168.102.21:12222:ssh:~/.ssh/hardening-kev
+krem:db01:192.168.102.30:12222:ssh:~/.ssh/hardening-kev
+krem:db02:192.168.102.31:12222:ssh:~/.ssh/hardening-kev
+krem:db03:192.168.102.32:12222:ssh:~/.ssh/hardening-kev
