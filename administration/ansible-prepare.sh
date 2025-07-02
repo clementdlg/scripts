@@ -91,7 +91,7 @@ create_user() {
 	fi
 
 	useradd -Um "$_USERNAME"
-	usermod -aG wheel "$_PASSWORD"
+	usermod -aG wheel "$_USERNAME"
 	echo "$_USERNAME:$_PASSWORD" | chpasswd
 
 	echo "[Info] Created user '$_USERNAME'"
