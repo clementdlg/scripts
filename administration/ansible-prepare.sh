@@ -96,6 +96,11 @@ create_user() {
 }
 
 main() {
+	if [[ $EUID -ne 0 ]]; then
+		echo "[Error] Run this script with root privileges"
+		exit 0
+	fi
+
 	if [[ $# -eq 0 || $# -eq 1 && "$1" == "--help" ]]; then
 		usage
 		exit 0
