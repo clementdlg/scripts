@@ -81,6 +81,7 @@ configure_sshd() {
 	# remove backup
 	rm "$backup"
 
+	systemctl reload sshd.service
 	echo "[Info] Disabled PasswordAuthentication for sshd"
 }
 
@@ -120,11 +121,15 @@ main() {
 	configure_sshd
 	create_user
 
-	echo "[Exit] Execution sucessful"
+	echo "[Exit] Execution sucessful. Host is ready for Ansible."
 }
 
 main "$@"
 
+# todo: 
+# si jautorise que la connection par clé il faut que je add mon id avant
+# verifier l'install ssh et python
+# supporter debian et ubuntu
 # possible improvements :
 # - add option to custom username
 # - harden ssh further
